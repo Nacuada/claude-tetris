@@ -15,7 +15,6 @@ const COLORS = [
   '#ffb74d', // L - orange
 ];
 
-
 const PIECES = [
   null,
   [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], // I
