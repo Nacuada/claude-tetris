@@ -42,7 +42,8 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 
-let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval;
+let animId = null;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -138,6 +139,7 @@ function softDrop() {
 }
 
 function lockPiece() {
+  if (gameOver) return;
   merge();
   clearLines();
   spawn();
@@ -146,10 +148,11 @@ function lockPiece() {
 function spawn() {
   current = next;
   next = randomPiece();
+  drawNext();
   if (collide(current.shape, current.x, current.y)) {
     endGame();
+    return;
   }
-  drawNext();
 }
 
 function updateHUD() {
@@ -222,7 +225,8 @@ function drawNext() {
 
 function endGame() {
   gameOver = true;
-  cancelAnimationFrame(animId);
+  stopLoop();
+  draw();
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
@@ -231,18 +235,34 @@ function endGame() {
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
-  if (!paused) {
-    lastTime = performance.now();
-    loop(lastTime);
-  } else {
-    cancelAnimationFrame(animId);
+  if (paused) {
+    stopLoop();
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
     overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+    startLoop();
   }
 }
 
+function stopLoop() {
+  if (animId !== null) {
+    cancelAnimationFrame(animId);
+    animId = null;
+  }
+}
+
+function startLoop() {
+  stopLoop();
+  lastTime = performance.now();
+  dropAccum = 0;
+  animId = requestAnimationFrame(loop);
+}
+
 function loop(ts) {
+  animId = null; // este frame ya se ejecutó: su handle ya no se puede cancelar
+  if (gameOver || paused) return; // la partida está detenida: no avanzar
   const dt = ts - lastTime;
   lastTime = ts;
   dropAccum += dt;
@@ -251,14 +271,16 @@ function loop(ts) {
     if (!collide(current.shape, current.x, current.y + 1)) {
       current.y++;
     } else {
-      lockPiece();
+      lockPiece(); // puede terminar la partida
     }
   }
   draw();
+  if (gameOver || paused) return; // no programar otro frame
   animId = requestAnimationFrame(loop);
 }
 
 function init() {
+  stopLoop();
   board = createBoard();
   score = 0;
   lines = 0;
@@ -272,12 +294,11 @@ function init() {
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
-  cancelAnimationFrame(animId);
-  animId = requestAnimationFrame(loop);
+  startLoop();
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP') { if (!e.repeat) togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -301,6 +322,9 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', init);
+restartBtn.addEventListener('click', () => {
+  restartBtn.blur(); // si conserva el foco, Space (caída rápida) lo reactivaría
+  init();
+});
 
 init();
