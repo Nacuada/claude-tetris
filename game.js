@@ -11,7 +11,7 @@ const COLORS = [
   '#ba68c8', // T - purple
   '#81c784', // S - green
   '#e57373', // Z - red
-  '#7986cb', // J - indigo
+  '#90caf9', // J - pale blue
   '#ffb74d', // L - orange
 ];
 
@@ -41,9 +41,27 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeToggleBtn = document.getElementById('theme-toggle');
 
+<<<<<<< HEAD
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval;
 let animId = null;
+=======
+let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let gridColor = '#22222e';
+
+function applyTheme(theme) {
+  document.body.classList.toggle('light', theme === 'light');
+  themeToggleBtn.textContent = theme === 'light' ? '☀️' : '🌙';
+  gridColor = getComputedStyle(document.body).getPropertyValue('--grid-line').trim();
+  localStorage.setItem('theme', theme);
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  applyTheme(saved === 'light' ? 'light' : 'dark');
+}
+>>>>>>> 5b7c29475ee73f02b912fce2b0a7b942ef734e71
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -174,7 +192,7 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -327,4 +345,9 @@ restartBtn.addEventListener('click', () => {
   init();
 });
 
+themeToggleBtn.addEventListener('click', () => {
+  applyTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+});
+
+initTheme();
 init();
