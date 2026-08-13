@@ -105,6 +105,20 @@ jobs:
 
             REGLAS
             - Escribe todo el comentario en espanol.
+            - El comentario debe estar en Markdown valido de GitHub (GitHub Flavored Markdown),
+              de forma que GitHub lo renderice correctamente al publicarlo:
+              - Encabezados con `##` / `###`, negritas con `**...**`, listas con `-` y listas
+                numeradas con `1.`, separadores con `---`.
+              - El codigo y los nombres de archivo, funciones y variables siempre entre backticks
+                (`game.js`, `tryRotate`, `game.js:123`); los bloques de codigo con ``` y su
+                lenguaje (```js), nunca indentados a mano.
+              - Enlaces en formato `[texto](url)` y tablas con `|` si hacen falta.
+              - Respeta los saltos de linea reales: deja una linea en blanco entre parrafos y
+                antes de cada encabezado o lista, o GitHub los pegara en un mismo parrafo. Al
+                pasar el cuerpo a `gh api`, asegurate de que los saltos de linea se envien como
+                saltos reales y no como la secuencia literal \n.
+              - No escapes los caracteres de Markdown ni envuelvas todo el comentario en un
+                bloque de codigo: debe verse renderizado, no como texto plano.
             - No modifiques codigo, no hagas commits ni abras pull requests, no cierres el issue.
             - Basate en el codigo real; si algo no se puede confirmar leyendolo, dilo como hipotesis.
             - Se conciso y util. No sobre-elabores la respuesta.
